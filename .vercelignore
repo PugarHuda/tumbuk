@@ -1,0 +1,8 @@
+web/
+.git/
+.github/
+test_*.py
+*.md
+.env
+.gitignore
+LICENSE

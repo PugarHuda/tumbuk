@@ -1,0 +1,22 @@
+name: ci
+on: [push, pull_request]
+jobs:
+  selfcheck:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install deps
+        run: pip install -r requirements.txt
+      - name: Report self-check (pure logic, no network)
+        run: python report.py
+      - name: Attack-suite + grading self-check (pure logic, no network)
+        run: python test_tumbuk.py
+      - name: Import server
+        run: python -c "import server; print('server imports ok')"
+      - name: Server integration test (guards + SSRF + access_key)
+        run: python test_server.py
+      - name: Offline full-deliverable demo (no network)
+        run: python demo.py

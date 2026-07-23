@@ -1,0 +1,3 @@
+fastmcp==3.4.4
+uvicorn
+# everything else (HTTP probes, hashing, JSON) is stdlib — no extra client libs needed.
