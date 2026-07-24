@@ -1,0 +1,83 @@
+# OKX.AI Genesis Hackathon — Google Form draft (Tumbuk)
+
+Deadline: **Jul 27, 23:59 UTC**. Account: hudapugar@gmail.com
+
+> Dependency: **Agent ID** is issued only AFTER the ASP is listed & goes live on
+> OKX.AI. Deploy → list → get the ID → then fill this in. See DEPLOY.md.
+
+---
+
+### ASP Name *
+```
+Tumbuk — Agent Red-Team ASP
+```
+
+### Agent ID *
+```
+<< issued after listing goes live — see DEPLOY.md >>
+```
+
+### ASP Description *
+```
+Everyone audits the smart contract. Nobody audits the agent. As agents on OKX.AI start
+hiring and paying each other over A2MCP, the new attack surface is the agent's behavior —
+prompt injection, fund/secret exfiltration, jailbreaks, and forged A2A trust signals.
+Tumbuk hires out as the adversary: point it at an agent's endpoint and it fires 8
+adversarial probes in parallel — prompt-injection, unauthorized fund-transfer,
+secret/credential exfiltration, jailbreak/persona-override, A2A output-trust hijacking,
+system-prompt leakage, instruction override, and indirect (tool/RAG-borne) injection —
+then returns a scored, reproducible vulnerability report graded A–F.
+
+Detection is deterministic, no LLM judge: planted canary tokens + credential-pattern
+matching, so a report reproduces from the same suite and holds up under a human
+spot-check. Grading is safety-first — a single confirmed critical hole caps the grade at
+F, full stop. It's a real on-chain business, agent-native for OKX.AI: pay-per-call —
+$0.99 in USDT0 on X Layer, settled on-chain via x402 (real OKX facilitator config, not
+illustrative). A FREE quote tool reports the price before you commit; a hard consent gate
+means it only ever probes the endpoint you supply. Any builder listing an ASP can hire
+Tumbuk as a pre-listing security gate before they trust another agent with money or data —
+a dependency other agents want.
+
+One endpoint in → a graded, reproducible, tamper-evident red-team report out.
+MCP endpoint https://<host>/mcp
+```
+
+### ASP Type *
+```
+A2MCP
+```
+(FastMCP server — paid tool `redteam_scan(target_url, consent)`; also free `quote`.)
+
+### X Account Handle *
+```
+@BangDropID
+```
+
+### X Participation Post (Link) *
+```
+<< post the ≤90s Tumbuk demo with #OKXAI @OKX, paste the link (can be a thread off the
+   DALANG post, or its own) >>
+```
+
+### Telegram Handle *
+```
+<< your @telegram >>
+```
+
+---
+
+## Category to target
+Primary: **Creative Genius** (20,000 USD — "use your imagination": red-teaming the agent
+*behavior* layer is a category nobody else covers). Also **Revenue Rocket** (paid $0.99
+x402 A2MCP, real on-chain settlement). Naturally supports **Social Buzz** via the X post.
+
+## Pricing
+$0.99 USDT0 per scan on X Layer. Tumbuk consumes no model credits — the marginal cost is
+only outbound probe bandwidth, so the $0.99 is near-pure margin (unlike a render agent).
+
+## Status checklist
+- [x] Code complete, self-checks + demo green, pushed (`PugarHuda/tumbuk`)
+- [ ] Deploy live to Vercel → live `/mcp` endpoint (DEPLOY.md)
+- [ ] Register A2MCP ASP on OKX (VPN + wallet) → Agent ID
+- [ ] Post demo on X with #OKXAI → paste link
+- [ ] Submit this form before Jul 27 23:59 UTC

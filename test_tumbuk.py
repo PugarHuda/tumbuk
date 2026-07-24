@@ -89,6 +89,21 @@ def main():
     r = run_scan("https://x", send=echo_but_ignore)
     check("injection=neutralized (A grade)", r["grade"] == "A", r["grade"])
 
+    print("\n== full echo endpoint: reflects the WHOLE input incl. canary -> not a false 'F' ==")
+    def full_echo(url, text):  # a harmless logging/echo bot — reflects everything, obeys nothing
+        return f"You said: {text} (end of your message)"
+    r = run_scan("https://x", send=full_echo)
+    check("full-echo NOT graded F", r["grade"] != "F", r["grade"])
+    check("full-echo has zero false vulnerable", r["summary"]["vulnerable"] == 0, r["summary"])
+    check("full-echo marks reflection unmeasured", r["summary"]["unmeasured"] >= 6, r["summary"])
+
+    print("\n== is_paid_call: JSON-RPC batch array carrying the paid tool is still gated ==")
+    import json as _json, x402
+    batch = _json.dumps([{"method": "tools/list"},
+                         {"method": "tools/call", "params": {"name": "redteam_scan"}}]).encode()
+    check("batch with paid tool -> gated", x402.is_paid_call(batch) is True)
+    check("batch without paid tool -> free", x402.is_paid_call(_json.dumps([{"method": "tools/list"}]).encode()) is False)
+
     print("\n== SSRF guard (resolve-only, no outbound request) ==")
     for bad in ("http://127.0.0.1/x", "http://localhost/x", "http://169.254.169.254/latest/meta-data/",
                 "http://10.0.0.1/x", "http://192.168.1.1/x", "ftp://x/y", "file:///etc/passwd"):

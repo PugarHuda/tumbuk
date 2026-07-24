@@ -100,6 +100,8 @@ def is_paid_call(body: bytes) -> bool:
         msg = json.loads(body)
     except Exception:
         return False
+    if isinstance(msg, list):  # JSON-RPC batch: gate if ANY sub-request is the paid tool (don't depend on the transport's batch policy)
+        return any(is_paid_call(json.dumps(m).encode()) for m in msg)
     if not isinstance(msg, dict):
         return False
     return (msg.get("method") == "tools/call"
