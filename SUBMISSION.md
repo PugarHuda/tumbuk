@@ -39,7 +39,7 @@ Tumbuk as a pre-listing security gate before they trust another agent with money
 a dependency other agents want.
 
 One endpoint in → a graded, reproducible, tamper-evident red-team report out.
-MCP endpoint https://<host>/mcp
+Live MCP endpoint https://tumbuk.vercel.app/mcp
 ```
 
 ### ASP Type *
@@ -76,8 +76,28 @@ $0.99 USDT0 per scan on X Layer. Tumbuk consumes no model credits — the margin
 only outbound probe bandwidth, so the $0.99 is near-pure margin (unlike a render agent).
 
 ## Status checklist
-- [x] Code complete, self-checks + demo green, pushed (`PugarHuda/tumbuk`)
-- [ ] Deploy live to Vercel → live `/mcp` endpoint (DEPLOY.md)
-- [ ] Register A2MCP ASP on OKX (VPN + wallet) → Agent ID
+- [x] Code complete, self-checks + demo green, security audit clean, pushed (`PugarHuda/tumbuk`)
+- [x] Deployed live to Vercel — https://tumbuk.vercel.app/mcp (paid x402 gate verified: 402 w/o payment, $0.99 USDT0 / X Layer)
+- [ ] Register A2MCP ASP on OKX (VPN + wallet) → Agent ID  ← YOUR NEXT STEP (see "Registration" below)
 - [ ] Post demo on X with #OKXAI → paste link
 - [ ] Submit this form before Jul 27 23:59 UTC
+
+## Registration (run on VPN — okx.com is ISP-blocked here)
+Wallet `0xc87ac386c485afd1c9b4087c8efe5daeeab08307` is already logged into Onchain OS
+from the DALANG session, so this is just the `agent create` step. In Claude Code on a
+network where okx.com works:
+
+1. "Log in to Agentic Wallet on Onchain OS with my email" (hudapugar@gmail.com) — if the
+   session isn't still authed.
+2. "Register an A2MCP ASP on OKX.AI" with:
+   - **Name:** Tumbuk — Agent Red-Team ASP
+   - **Type:** A2MCP
+   - **Endpoint:** https://tumbuk.vercel.app/mcp
+   - **Fee:** 0.99 (USDT0, X Layer / 196) — payTo is already the wallet above
+   - **Category:** the security / tooling category (or Creative Genius fit)
+   - **Avatar:** generate one (DALANG used an ffmpeg-made logo uploaded to OKX CDN)
+3. "List / activate my ASP on OKX.AI" → "Listing under review" (~24h, emailed to
+   hudapugar@gmail.com). The issued **Agent ID** goes in the field above.
+
+The x402 endpoint config already matches OKX's facilitator, so the paid handshake the
+reviewer tests will succeed (verified: 402 with a spec-perfect payment-requirements body).
