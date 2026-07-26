@@ -9,13 +9,18 @@ Deadline: **Jul 27, 23:59 UTC**. Account: hudapugar@gmail.com
 
 ### ASP Name *
 ```
-Tumbuk — Agent Red-Team ASP
+Tumbuk Red-Team
 ```
+(the on-chain name — OKX caps an agent name at 25 chars, so the longer
+"Tumbuk — Agent Red-Team ASP" didn't fit. Use this exact name in the form so it
+matches the listing.)
 
 ### Agent ID *
 ```
-<< issued after listing goes live — see DEPLOY.md >>
+9619
 ```
+(registered on X Layer 2026-07-27, tx 0x6b6cf6ca6e2a42e759e9b9d374c53b80019edd993700db7eda2b6ac01705b5d9 ·
+submitted for review, approvalStatus 2 · EVM wallet 0xc87ac386c485afd1c9b4087c8efe5daeeab08307)
 
 ### ASP Description *
 ```
@@ -78,9 +83,10 @@ only outbound probe bandwidth, so the $0.99 is near-pure margin (unlike a render
 ## Status checklist
 - [x] Code complete, self-checks + demo green, security audit clean, pushed (`PugarHuda/tumbuk`)
 - [x] Deployed live to Vercel — https://tumbuk.vercel.app/mcp (paid x402 gate verified: 402 w/o payment, $0.99 USDT0 / X Layer)
-- [ ] Register A2MCP ASP on OKX (VPN + wallet) → Agent ID  ← YOUR NEXT STEP (see "Registration" below)
-- [ ] Post demo on X with #OKXAI → paste link
-- [ ] Submit this form before Jul 27 23:59 UTC
+- [x] Registered as A2MCP ASP on OKX — **Agent ID 9619**, submitted for review (2026-07-27)
+  - two services: paid `Agent Red-Team Security Scan` (0.99) + free `Report Digest Verification` (0)
+- [ ] Record + post the ≤90s demo on X with #OKXAI @OKX → paste link  ← YOUR NEXT STEP (script in demo-x-post.md)
+- [ ] Submit this form before Jul 27 23:59 UTC (= Jul 28 06:59 WIB) — Telegram handle is the only field nobody but you can fill
 
 ## Registration (run on VPN — okx.com is ISP-blocked here)
 Wallet `0xc87ac386c485afd1c9b4087c8efe5daeeab08307` is already logged into Onchain OS
