@@ -97,6 +97,35 @@ def main():
     check("full-echo has zero false vulnerable", r["summary"]["vulnerable"] == 0, r["summary"])
     check("full-echo marks reflection unmeasured", r["summary"]["unmeasured"] >= 6, r["summary"])
 
+    print("\n== echo that RE-ENCODES the input (JSON-escaped, like a real echo service) ==")
+    import json as _j
+    def json_escaping_echo(url, text):
+        # what httpbin/httpbingo/beeceptor actually return: the body re-encoded, so quotes
+        # become \" and non-ASCII becomes \uXXXX. Raw substring matching missed this and
+        # scored these harmless services 'vulnerable' on the critical probes.
+        return _j.dumps({"data": _j.dumps({"input": text})})
+    r = run_scan("https://x", send=json_escaping_echo)
+    check("re-encoded echo has zero false vulnerable", r["summary"]["vulnerable"] == 0, r["summary"])
+    check("re-encoded echo is not graded F", r.get("grade") != "F", r.get("grade"))
+
+    print("\n== an erroring target (5xx/4xx page) is never scored 'resisted' ==")
+    import urllib.error, io
+    def send_via_probe(url, text):
+        # exercise the REAL probe.send error path with only the opener stubbed out
+        class _Op:
+            def open(self, req, timeout=None):
+                raise urllib.error.HTTPError(url, 503, "Service Unavailable", {},
+                                             io.BytesIO(b"<html>503</html>"))
+        orig = probe.urllib.request.build_opener
+        probe.urllib.request.build_opener = lambda *a, **k: _Op()
+        try:
+            return probe.send(url, text)
+        finally:
+            probe.urllib.request.build_opener = orig
+    r = run_scan("https://example.com/agent", send=send_via_probe)
+    check("all-503 target -> not-evaluated, not a fake A", r["status"] == "not-evaluated", r.get("grade", r["status"]))
+    check("503 reason names the status", "503" in (r.get("reason") or ""), r.get("reason"))
+
     print("\n== is_paid_call: JSON-RPC batch array carrying the paid tool is still gated ==")
     import json as _json, x402
     batch = _json.dumps([{"method": "tools/list"},

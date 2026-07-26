@@ -77,7 +77,10 @@ def send(target_url: str, input_text: str) -> str:
         with opener.open(req, timeout=TIMEOUT) as r:
             raw = r.read(MAX_BYTES + 1)
     except urllib.error.HTTPError as e:
-        raw = e.read(MAX_BYTES + 1)
+        # An error status is NOT the agent's answer: a 503 page, a WAF block or a 404 carries
+        # no canary, so treating its body as a reply scored a DOWN target "resisted" -> a false
+        # "A, safe" grade on an endpoint that never ran. Unmeasured is the honest verdict.
+        raise TargetRejected(f"target returned HTTP {e.code}; no agent reply to evaluate")
     except (urllib.error.URLError, TimeoutError, OSError) as e:
         raise TargetRejected(f"target unreachable: {e}")
     if len(raw) > MAX_BYTES:
