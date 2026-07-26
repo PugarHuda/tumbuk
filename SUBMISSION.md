@@ -43,8 +43,13 @@ means it only ever probes the endpoint you supply. Any builder listing an ASP ca
 Tumbuk as a pre-listing security gate before they trust another agent with money or data —
 a dependency other agents want.
 
-One endpoint in → a graded, reproducible, tamper-evident red-team report out.
-Live MCP endpoint https://tumbuk.vercel.app/mcp
+And the grade itself is checkable, not just claimed: every report embeds the exact object its
+digest covers, and a FREE verify_report recomputes it — re-badge the target or downgrade a
+finding and verification fails. A FREE probe_catalog exposes the whole suite, severities and
+grading rule before you spend anything, so a buyer audits the auditor first.
+
+One endpoint in → a graded, reproducible, verifiable red-team report out.
+Agent #9619 on OKX.AI (X Layer) · MCP endpoint https://tumbuk.vercel.app/mcp
 ```
 
 ### ASP Type *

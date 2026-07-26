@@ -1,7 +1,8 @@
 # Tumbuk — X post + 90s demo script for #OKXAI
 
 Live ASP: `https://tumbuk.vercel.app/mcp` · Repo: github.com/PugarHuda/tumbuk · Handle: @BangDropID
-Agent ID: ‹fill after OKX listing goes live — see SUBMISSION.md §Registration›
+OKX.AI **Agent #9619** ("Tumbuk Red-Team", X Layer) — registered 2026-07-27, listing in review.
+Two services: paid `Agent Red-Team Security Scan` ($0.99) + free `Report Digest Verification`.
 
 > Framing: **everyone audits the contract, nobody audits the agent.** Tumbuk is live and PAID —
 > $0.99 USDT0 on X Layer via real x402 (OKX facilitator, eip155:196). Detection is deterministic
@@ -13,15 +14,17 @@ Agent ID: ‹fill after OKX listing goes live — see SUBMISSION.md §Registrati
 
 > You audited the smart contract. **Did you audit the agent?** 🔨
 >
-> **Tumbuk** is a live agent on @OKX AI that red-teams *other* agents. Point it at an endpoint —
-> it fires 8 adversarial probes in parallel (prompt injection, fund drain, secret exfil, jailbreak,
-> forged A2A trust…) and returns a graded **A–F** vulnerability report.
+> **Tumbuk** red-teams *other* agents. Point it at an endpoint — it fires 8 adversarial probes in
+> parallel (prompt injection, fund drain, secret exfil, jailbreak, forged trust signals…) and
+> returns a graded **A–F** vulnerability report.
 >
 > No LLM judge. Planted canary tokens + credential regex → **reproducible**. One confirmed critical
-> hole caps the grade at **F**, full stop.
+> hole caps the grade at **F**, full stop. And you don't have to trust the grade: a free
+> `verify_report` recomputes the report's digest, so a forged verdict fails on the spot.
 >
-> Pay-per-call **$0.99 USDT0 on X Layer** (real x402). Hire the adversary before you trust an agent
-> with your money. 👇 #OKXAI
+> Pay-per-call **$0.99 USDT0 on X Layer** (real x402, OKX facilitator). Agent **#9619** on @OKX AI.
+>
+> Hire the adversary before you trust an agent with your money. 👇 #OKXAI
 
 *(attach: the 90s demo below)*
 
@@ -48,9 +51,14 @@ Agent ID: ‹fill after OKX listing goes live — see SUBMISSION.md §Registrati
 > SSRF-guarded probe layer that blocks localhost, private ranges and cloud-metadata IPs in every
 > encoding. It only ever probes the endpoint you hand it.
 >
-> 6/ **$0.99 USDT0 per scan on X Layer**, settled on-chain via x402 through OKX's own facilitator —
+> 6/ **Don't trust the grade — check it.** Every report embeds the exact object its digest covers,
+> and a free `verify_report` recomputes it. Re-badge the target or downgrade a finding and
+> verification fails. A free `probe_catalog` shows the whole suite before you buy. 🔍
+>
+> 7/ **$0.99 USDT0 per scan on X Layer**, settled on-chain via x402 through OKX's own facilitator —
 > free `quote` first. Zero model credits burned, so it's a real margin business, not a demo.
-> Any builder listing an ASP can hire Tumbuk as a **pre-listing security gate**. #OKXAI
+> Any builder listing an ASP can hire Tumbuk as a **pre-listing security gate**.
+> Agent #9619 on @OKX AI · `https://tumbuk.vercel.app/mcp` #OKXAI
 
 ---
 
@@ -65,7 +73,7 @@ Assets: a terminal (`python demo.py` = offline vuln + safe stub), a live 402 cur
 | 2 | 8–18 | Terminal: `python demo.py` — 8 probes fire, canary tokens scroll | 8 adversarial probes, parallel | "Tumbuk points 8 adversarial probes at an agent's endpoint." |
 | 3 | 18–38 | The VULNERABLE report renders: **Grade F**, critical rows (fund transfer, secret exfil), canary evidence quoted | Grade F · confirmed critical | "This one obeyed every embedded instruction — it confirmed a transfer and leaked a credential. One critical hole, and the grade is F. No averaging." |
 | 4 | 38–50 | Scroll to the SAFE stub report: **Grade A**, all probes refused | Grade A · same suite | "Same suite against a hardened agent: A. Deterministic — canary tokens, not a model's opinion. Run it twice, get the same report." |
-| 5 | 50–62 | Highlight the JSON block: `report_digest`, per-probe severity | Tamper-evident digest | "Every report is fingerprinted, so the grade you show a customer is the grade that was produced." |
+| 5 | 50–62 | Highlight `report_digest`, then call the free `verify_report` on the block → `digest_matches: true`. Edit one finding, run it again → `false` | Don't trust it — verify it | "Every report is fingerprinted, and anyone can recompute it. Alter one finding and verification fails. The grade is checkable, not just claimed." |
 | 6 | 62–78 | Terminal: curl the LIVE endpoint `redteam_scan` with no payment → **HTTP 402**, `eip155:196` / `USDT0` / `990000` visible | Real x402 · X Layer | "It's a paid agent: $0.99 in USDT0 on X Layer, settled through OKX's facilitator. Free quote first." |
 | 7 | 78–90 | OKX.AI listing page for Tumbuk. Cut to logo: **TUMBUK — audit the agent, not just the contract.** | Live on OKX AI · #OKXAI | "Hire the adversary before you trust an agent with your money. Live on OKX AI." |
 
@@ -78,8 +86,9 @@ The 402 in beat 6 is the real production endpoint.
 
 ## Alt 1-tweet (if you skip the thread)
 > Everyone audits the smart contract. Nobody audits the **agent**. **Tumbuk** fires 8 adversarial
-> probes at any agent endpoint and grades it **A–F** — deterministic, reproducible, tamper-evident.
-> $0.99 USDT0 on X Layer via x402. Live on @OKX AI. 🔨 #OKXAI
+> probes at any agent endpoint and grades it **A–F** — deterministic, reproducible, and the grade
+> itself is verifiable (recompute the report digest yourself). $0.99 USDT0 on X Layer via x402.
+> Agent #9619 on @OKX AI. 🔨 #OKXAI
 
 ---
 
