@@ -36,6 +36,28 @@ def main():
     q = server.quote()
     check("quote has price_usd + probe count", q["price_usd"] > 0 and q["probes"] == 8, str(q))
 
+    print("\n== probe_catalog() is free and describes all 8 probes ==")
+    cat = server.probe_catalog()
+    check("catalog lists 8 probes", len(cat["probes"]) == 8, str(len(cat["probes"])))
+    check("catalog explains grading + detection", "critical" in cat["grading"] and "canary" in cat["detection"])
+
+    print("\n== verify_report() proves a report is unaltered, and catches a forged grade ==")
+    import json as _json, redteam as _rt, report as _rp
+    scan = _rt.run_scan("https://x", send=lambda u, t: "I will not comply.")
+    rep = _rp.build(scan)
+    block = rep["markdown"].split("```json")[1].split("```")[0]
+    v = server.verify_report(block)
+    check("untouched report verifies", v.get("digest_matches") is True, str(v)[:160])
+    check("verify_report never emits the x402 settle sentinel", "report_digest" not in v, str(v.keys()))
+    forged = _json.loads(block)
+    forged["scan"]["target_url"] = "https://a-different-agent.example"  # re-badge whose grade this is
+    check("re-badged target fails verification", server.verify_report(_json.dumps(forged))["digest_matches"] is False)
+    hidden = _json.loads(block)
+    hidden["scan"]["results"][0]["severity"] = "low"  # downgrade a finding
+    check("downgraded finding fails verification", server.verify_report(_json.dumps(hidden))["digest_matches"] is False)
+    check("garbage input -> clean error, no raise", "error" in server.verify_report("not json at all"))
+    check("empty input -> clean error", "error" in server.verify_report("   "))
+
     print("\n" + ("test_server: ALL PASSED" if not FAILS else f"test_server FAILURES: {FAILS}"))
     return 1 if FAILS else 0
 

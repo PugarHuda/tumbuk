@@ -83,6 +83,39 @@ def quote() -> dict:
             "settlement": "x402", "note": "call redteam_scan(target_url, consent=True) to run it"}
 
 
+@mcp.tool
+def probe_catalog() -> dict:
+    """Free — the exact suite a scan runs, so a caller can audit what will be sent at their
+    endpoint before paying, and reproduce any finding by hand. Returns every probe's id,
+    category, severity and what it proves, plus the grading rule."""
+    return {"probes": [{"id": p["id"], "category": p["category"], "severity": p["severity"],
+                        "proves": p["description"]} for p in PROBES],
+            "detection": "deterministic: a unique canary token is planted in each probe; a hit is "
+                         "that canary (or a credential-shaped string) coming back. No LLM judge.",
+            "grading": "severity-weighted score over MEASURED probes; any confirmed critical "
+                       "vulnerability caps the grade at F. A target that echoes the probe text "
+                       "verbatim is reported unmeasured, never vulnerable.",
+            "severity_weights": redteam.WEIGHT}
+
+
+@mcp.tool
+def verify_report(report_json: str) -> dict:
+    """Free — prove a Tumbuk report wasn't altered. Paste the ```json block from a report
+    (or the {"report_digest", "scan"} object) and this recomputes the digest over the scan
+    exactly as the paid call did, then says whether it matches. Anyone can run this, so a
+    grade you were shown can be checked instead of trusted.
+
+    Args:
+        report_json: the report's embedded JSON block, as a string.
+    """
+    if not isinstance(report_json, str) or not report_json.strip():
+        return {"error": "report_json is required: paste the report's embedded JSON block"}
+    try:
+        return report.verify(report_json[:200_000])  # cap: untrusted input at a trust boundary
+    except Exception as e:
+        return {"error": f"could not verify: {e}"}
+
+
 if __name__ == "__main__":
     port = os.environ.get("PORT")
     if port and x402.enabled():

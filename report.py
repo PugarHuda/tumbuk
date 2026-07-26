@@ -22,6 +22,29 @@ def digest(report: dict) -> str:
     return "0x" + hashlib.sha256(canonical).hexdigest()
 
 
+def verify(payload) -> dict:
+    """Recompute a report's digest from its own embedded payload — the buyer's side of the
+    tamper-evident claim. Accepts the report's embedded JSON block (dict or JSON string),
+    or a bare scan object plus a digest to compare against.
+
+    Deliberately does NOT return a "report_digest" key: that quoted key is the x402 settle
+    sentinel (x402.py), and this is a FREE tool — emitting it would let a batch pair a failed
+    paid scan with a free verify and settle on the free tool's output.
+    """
+    if isinstance(payload, (bytes, bytearray)):
+        payload = payload.decode("utf-8", "replace")
+    if isinstance(payload, str):
+        payload = json.loads(payload)
+    if not isinstance(payload, dict):
+        raise ValueError("expected a JSON object")
+    scan = payload.get("scan") if isinstance(payload.get("scan"), dict) else payload
+    claimed = payload.get("report_digest") or payload.get("digest") or ""
+    recomputed = digest(scan)
+    return {"recomputed_digest": recomputed, "claimed_digest": claimed,
+            "digest_matches": bool(claimed) and recomputed == claimed,
+            "note": "digest = sha256 over the canonical JSON (sorted keys, no whitespace) of the scan object"}
+
+
 def build(scan: dict) -> dict:
     """scan: the dict from redteam.run_scan(). Returns {"markdown", "json", "report_digest"}
     for an evaluated scan, or {"error": ...} passthrough for not-evaluated."""
@@ -41,8 +64,11 @@ def build(scan: dict) -> dict:
     s = scan["summary"]
     lines += ["", f"## Summary", f"{s['resisted']}/{s['total']} resisted, {s['vulnerable']} vulnerable, "
               f"{s['unmeasured']} unmeasured.", "",
-              "```json", json.dumps({"grade": scan["grade"], "score": scan["score"],
-                                     "report_digest": rd, "results": scan["results"]}, indent=2), "```"]
+              "```json",
+              # embed the EXACT object the digest was taken over, so the buyer can recompute it
+              # (verify_report / report.verify). Omitting target_url+status+summary, as this block
+              # used to, made the "tamper-evident digest" unverifiable by anyone but us.
+              json.dumps({"report_digest": rd, "scan": scan}, indent=2, sort_keys=True), "```"]
     return {"markdown": "\n".join(lines), "report_digest": rd, "grade": scan["grade"], "score": scan["score"]}
 
 
@@ -60,6 +86,16 @@ def demo() -> None:
     d1 = digest(fake_vuln)
     d2 = digest(dict(reversed(list(fake_vuln.items()))))
     assert d1 == d2  # canonical (key-order independent)
+
+    # the buyer must be able to recompute the digest from the report ALONE
+    block = json.loads(out["markdown"].split("```json")[1].split("```")[0])
+    v = verify(block)
+    assert v["digest_matches"] and v["recomputed_digest"] == out["report_digest"], v
+    assert "report_digest" not in v  # free tool must not emit the x402 settle sentinel
+    tampered = json.loads(json.dumps(block))
+    tampered["scan"]["grade"] = "A"  # forge a pass
+    assert verify(tampered)["digest_matches"] is False
+    assert verify(json.dumps(block))["digest_matches"]  # accepts a JSON string too
     print("report self-check ok")
 
 

@@ -87,7 +87,11 @@ against OKX's own `@okxweb3/x402-*` SDK: facilitator `https://web3.okx.com/facil
 (standard `/verify` + `/settle`), network `eip155:196` (X Layer), asset **USDT0**
 (`0x779ded0c9e1022225f8e0630b35a9b54be713736`, EIP-3009). Set `TUMBUK_X402_PAYTO` to
 your X Layer wallet to enable the gate — the paid `redteam_scan` tool then returns
-HTTP 402 until paid; `quote()` (free) reports the price without spending it.
+HTTP 402 until paid. Three FREE tools stay open: `quote()` (price), `probe_catalog()`
+(the exact suite that will be fired at your endpoint, so you can audit it before
+paying), and `verify_report(report_json)` (recompute a report's digest and prove it
+wasn't altered — the buyer's half of the tamper-evident claim; a report embeds the
+exact object the digest covers, so anyone can check a grade instead of trusting it).
 
 ## Consent & safety
 
@@ -118,7 +122,8 @@ attacks.py    attack library + deterministic detectors (pure, unit-tested)
 probe.py      SSRF-guarded HTTP adapter to a target agent
 redteam.py    parallel probe runner + safety-first scoring/grading
 report.py     markdown report + embedded JSON block + tamper-evident digest
-server.py     FastMCP tool (redteam_scan, quote) + x402 gate
+server.py     FastMCP tools (paid redteam_scan; free quote, probe_catalog,
+              verify_report) + x402 gate
 x402.py       x402/X Layer paid-endpoint middleware (OKX-confirmed config)
 api/index.py  Vercel serverless entrypoint
 demo.py       offline full-deliverable demo (no network, no key)
