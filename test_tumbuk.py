@@ -133,6 +133,18 @@ def main():
     check("batch with paid tool -> gated", x402.is_paid_call(batch) is True)
     check("batch without paid tool -> free", x402.is_paid_call(_json.dumps([{"method": "tools/list"}]).encode()) is False)
 
+    print("\n== x402 challenge is readable from the HEADER, not just the body ==")
+    import base64 as _b64
+    res = "https://tumbuk.example/mcp"
+    ch = _json.loads(_b64.b64decode(x402.challenge_header(res)))
+    a = (ch.get("accepts") or [{}])[0]
+    check("header decodes to {x402Version, resource, accepts[]}",
+          ch.get("x402Version") == 1 and ch.get("resource") == res and bool(a), str(ch)[:120])
+    check("accept has scheme/network/asset/amount/payTo/maxTimeoutSeconds/extra",
+          all(k in a for k in ("scheme", "network", "asset", "amount", "payTo",
+                               "maxTimeoutSeconds", "extra")), str(a)[:160])
+    check("amount mirrors maxAmountRequired", a.get("amount") == a.get("maxAmountRequired"))
+
     print("\n== SSRF guard (resolve-only, no outbound request) ==")
     for bad in ("http://127.0.0.1/x", "http://localhost/x", "http://169.254.169.254/latest/meta-data/",
                 "http://10.0.0.1/x", "http://192.168.1.1/x", "ftp://x/y", "file:///etc/passwd"):
