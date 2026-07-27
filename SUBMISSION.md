@@ -50,6 +50,7 @@ grading rule before you spend anything, so a buyer audits the auditor first.
 
 One endpoint in → a graded, reproducible, verifiable red-team report out.
 Agent #9619 on OKX.AI (X Layer) · MCP endpoint https://tumbuk.vercel.app/mcp
+Site + in-browser report verifier: https://tumbuk-security.vercel.app
 ```
 
 ### ASP Type *

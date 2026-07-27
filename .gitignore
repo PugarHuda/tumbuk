@@ -8,3 +8,6 @@ build/
 .vercel
 
 demo.mp4
+
+web/.vercel/
+assets_logo.png
