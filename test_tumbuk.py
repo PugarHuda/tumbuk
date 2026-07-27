@@ -138,8 +138,11 @@ def main():
     res = "https://tumbuk.example/mcp"
     ch = _json.loads(_b64.b64decode(x402.challenge_header(res)))
     a = (ch.get("accepts") or [{}])[0]
-    check("header decodes to {x402Version, resource, accepts[]}",
-          ch.get("x402Version") == 1 and ch.get("resource") == res and bool(a), str(ch)[:120])
+    check("header decodes to a v2 challenge {x402Version, resource, accepts[]}",
+          ch.get("x402Version") == 2 and (ch.get("resource") or {}).get("url") == res and bool(a),
+          str(ch)[:140])
+    check("accepts still carries the v1 keys for older clients",
+          a.get("maxAmountRequired") and a.get("resource") == res, str(a)[:120])
     check("accept has scheme/network/asset/amount/payTo/maxTimeoutSeconds/extra",
           all(k in a for k in ("scheme", "network", "asset", "amount", "payTo",
                                "maxTimeoutSeconds", "extra")), str(a)[:160])
