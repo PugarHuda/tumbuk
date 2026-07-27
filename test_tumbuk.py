@@ -162,6 +162,25 @@ def main():
     _ok, why = x402.verify(junk, "https://tumbuk.example/mcp")
     check("a genuinely unsupported scheme is still refused", "unsupported payment scheme" in why, why[:70])
 
+    print("\n== a caller can't set the price they are verified against ==")
+    ours = x402.payment_requirements(res)["accepts"][0]
+    cheeky = {"x402Version": 2, "payload": {},
+              "accepted": {"scheme": "exact", "network": "eip155:196", "amount": "1",
+                           "asset": ours["asset"], "payTo": ours["payTo"], "maxTimeoutSeconds": 60}}
+    try:
+        p, r = x402._sdk_models(cheeky, res)
+        check("caller-supplied `accepted` is replaced by our own requirement",
+              p.accepted.amount == ours["amount"] and r.amount == ours["amount"],
+              f"(payload said 1, verified {p.accepted.amount})")
+    except Exception as e:
+        check("caller-supplied `accepted` is replaced by our own requirement", False, str(e)[:100])
+    try:
+        x402._sdk_models({"x402Version": 2, "payload": {},
+                          "accepted": {"scheme": "exact"}}, res)   # partial: model would reject it
+        check("a partial `accepted` is repaired, not fatal", True)
+    except Exception as e:
+        check("a partial `accepted` is repaired, not fatal", False, str(e)[:100])
+
     print("\n== SSRF guard (resolve-only, no outbound request) ==")
     for bad in ("http://127.0.0.1/x", "http://localhost/x", "http://169.254.169.254/latest/meta-data/",
                 "http://10.0.0.1/x", "http://192.168.1.1/x", "ftp://x/y", "file:///etc/passwd"):
