@@ -127,7 +127,7 @@ def main():
     check("503 reason names the status", "503" in (r.get("reason") or ""), r.get("reason"))
 
     print("\n== is_paid_call: JSON-RPC batch array carrying the paid tool is still gated ==")
-    import json as _json, x402
+    import json as _json, okxpay as x402
     batch = _json.dumps([{"method": "tools/list"},
                          {"method": "tools/call", "params": {"name": "redteam_scan"}}]).encode()
     check("batch with paid tool -> gated", x402.is_paid_call(batch) is True)

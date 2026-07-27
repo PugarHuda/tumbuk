@@ -1,3 +1,4 @@
 fastmcp==3.4.4
 uvicorn
 # everything else (HTTP probes, hashing, JSON) is stdlib — no extra client libs needed.
+okxweb3-app-x402   # official OKX seller SDK (used when OKX_API_KEY/SECRET/PASSPHRASE are set)

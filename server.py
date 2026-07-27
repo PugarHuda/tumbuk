@@ -25,7 +25,10 @@ def _load_dotenv(path: str = ".env") -> None:
 
 
 _load_dotenv()
-import x402       # x402/X Layer paid-endpoint gate (opt-in via TUMBUK_X402_PAYTO)
+                 # our payment gate. The file is okxpay.py, NOT x402.py: OKX's official
+                 # seller SDK installs a package literally named `x402`, and a local module
+                 # with that name shadows it, so the SDK could never be imported.
+import okxpay as x402
 import redteam
 import report
 from attacks import PROBES

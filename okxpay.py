@@ -67,9 +67,37 @@ def payment_requirements(resource: str) -> dict:
     return challenge(resource) | {"error": "payment required: send PAYMENT-SIG (or X-PAYMENT)"}
 
 
+def _sdk_client():
+    """OKX's official seller SDK client, or None when credentials aren't configured.
+
+    The plain /verify + /settle calls below answer 403 without OKX-signed auth, which is
+    why a genuinely paid call still failed — the facilitator requires the API key, secret
+    and passphrase from your OKX account. Set OKX_API_KEY / OKX_SECRET_KEY /
+    OKX_PASSPHRASE and this path takes over (`pip install okxweb3-app-x402`).
+    """
+    k = os.environ.get("OKX_API_KEY", "")
+    s = os.environ.get("OKX_SECRET_KEY", "")
+    p = os.environ.get("OKX_PASSPHRASE", "")
+    if not (k and s and p):
+        return None
+    try:
+        from x402.http.okx_facilitator_client import OKXFacilitatorClientSync, OKXFacilitatorConfig
+        from x402.http.okx_auth import OKXAuthConfig
+        return OKXFacilitatorClientSync(OKXFacilitatorConfig(
+            auth=OKXAuthConfig(api_key=k, secret_key=s, passphrase=p)))
+    except Exception:
+        return None  # SDK absent -> fall back to the raw facilitator call
+
+
+def _sdk_models(payload: dict, resource: str):
+    from x402.schemas.payments import PaymentPayload, PaymentRequirements
+    req = PaymentRequirements.model_validate(payment_requirements(resource)["accepts"][0])
+    return PaymentPayload.model_validate(payload), req
+
+
 def verify(x_payment_b64: str, resource: str) -> tuple[bool, str]:
     if not x_payment_b64:
-        return False, "missing X-PAYMENT header"
+        return False, "missing payment: send PAYMENT-SIG (or X-PAYMENT)"
     try:
         payload = json.loads(base64.b64decode(x_payment_b64))
     except Exception:
@@ -78,6 +106,14 @@ def verify(x_payment_b64: str, resource: str) -> tuple[bool, str]:
         return False, "malformed X-PAYMENT header"
     if payload.get("x402Version") != 1 or payload.get("scheme") != "exact":
         return False, "unsupported payment scheme"
+    client = _sdk_client()
+    if client is not None:
+        try:
+            res = client.verify(*_sdk_models(payload, resource))
+            return bool(getattr(res, "is_valid", False)), getattr(res, "invalid_reason", "") or ""
+        except Exception as e:
+            return False, f"facilitator error: {e}"
+
     fac = _cfg()["facilitator"]
     if not fac:
         return False, "no facilitator configured"
@@ -94,13 +130,24 @@ def verify(x_payment_b64: str, resource: str) -> tuple[bool, str]:
 
 
 def settle(x_payment_b64: str, resource: str) -> tuple[bool, dict]:
-    fac = _cfg()["facilitator"]
-    if not fac:
-        return False, {"error": "no facilitator configured"}
     try:
         payload = json.loads(base64.b64decode(x_payment_b64))
     except Exception:
-        return False, {"error": "malformed X-PAYMENT header"}
+        return False, {"error": "malformed payment header"}
+
+    client = _sdk_client()
+    if client is not None:
+        try:
+            res = client.settle(*_sdk_models(payload, resource))
+            ok = bool(getattr(res, "success", False))
+            out = res.model_dump(by_alias=True) if hasattr(res, "model_dump") else {"success": ok}
+            return ok, out
+        except Exception as e:
+            return False, {"error": f"settlement failed: {e}"}
+
+    fac = _cfg()["facilitator"]
+    if not fac:
+        return False, {"error": "no facilitator configured"}
     body = json.dumps({"x402Version": 1, "paymentPayload": payload,
                        "paymentRequirements": payment_requirements(resource)["accepts"][0]}).encode()
     try:
