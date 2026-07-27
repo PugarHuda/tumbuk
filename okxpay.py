@@ -90,9 +90,21 @@ def _sdk_client():
 
 
 def _sdk_models(payload: dict, resource: str):
+    """Coerce either payload dialect into the SDK's models.
+
+    OKX's own client sends `accepted` (the requirement it paid against) and an object
+    `resource`; a plain coinbase/x402 client sends neither, and the SDK model then refuses
+    the payload outright. We already know what we quoted, so fill it in rather than reject
+    a caller for using the other dialect.
+    """
     from x402.schemas.payments import PaymentPayload, PaymentRequirements
-    req = PaymentRequirements.model_validate(payment_requirements(resource)["accepts"][0])
-    return PaymentPayload.model_validate(payload), req
+    accepts = payment_requirements(resource)["accepts"][0]
+    req = PaymentRequirements.model_validate(accepts)
+    p = dict(payload)
+    p.setdefault("accepted", accepts)
+    if isinstance(p.get("resource"), str):
+        p.pop("resource")            # the model wants an object; the requirement carries it
+    return PaymentPayload.model_validate(p), req
 
 
 def verify(x_payment_b64: str, resource: str) -> tuple[bool, str]:
@@ -104,7 +116,11 @@ def verify(x_payment_b64: str, resource: str) -> tuple[bool, str]:
         return False, "malformed X-PAYMENT header"
     if not isinstance(payload, dict):
         return False, "malformed X-PAYMENT header"
-    if payload.get("x402Version") != 1 or payload.get("scheme") != "exact":
+    # OKX's dialect nests the scheme inside `accepted`; coinbase/x402 puts it at the top
+    # level. Checking only the top level rejected a real OKX payment before it ever reached
+    # the facilitator.
+    scheme = payload.get("scheme") or (payload.get("accepted") or {}).get("scheme")
+    if payload.get("x402Version") not in (1, "1") or scheme != "exact":
         return False, "unsupported payment scheme"
     client = _sdk_client()
     if client is not None:

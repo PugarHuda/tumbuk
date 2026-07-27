@@ -145,6 +145,20 @@ def main():
                                "maxTimeoutSeconds", "extra")), str(a)[:160])
     check("amount mirrors maxAmountRequired", a.get("amount") == a.get("maxAmountRequired"))
 
+    print("\n== both payment dialects pass the pre-check (OKX nests scheme in `accepted`) ==")
+    okx_style = _b64.b64encode(_json.dumps(
+        {"x402Version": 1, "payload": {},
+         "accepted": {"scheme": "exact", "network": "eip155:196"}}).encode()).decode()
+    cb_style = _b64.b64encode(_json.dumps(
+        {"x402Version": 1, "scheme": "exact", "network": "eip155:196", "payload": {}}).encode()).decode()
+    junk = _b64.b64encode(_json.dumps({"x402Version": 1, "scheme": "cheque"}).encode()).decode()
+    for label, hdr in (("OKX-style", okx_style), ("coinbase-style", cb_style)):
+        _ok, why = x402.verify(hdr, "https://tumbuk.example/mcp")
+        check(f"{label} payment reaches the facilitator (not pre-rejected)",
+              "unsupported payment scheme" not in why, why[:70])
+    _ok, why = x402.verify(junk, "https://tumbuk.example/mcp")
+    check("a genuinely unsupported scheme is still refused", "unsupported payment scheme" in why, why[:70])
+
     print("\n== SSRF guard (resolve-only, no outbound request) ==")
     for bad in ("http://127.0.0.1/x", "http://localhost/x", "http://169.254.169.254/latest/meta-data/",
                 "http://10.0.0.1/x", "http://192.168.1.1/x", "ftp://x/y", "file:///etc/passwd"):
