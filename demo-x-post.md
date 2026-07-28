@@ -94,7 +94,9 @@ The 402 in beat 6 is the real production endpoint.
 
 ## Pre-post checklist
 - [x] Live + paid endpoint verified (402 w/o payment): https://tumbuk.vercel.app/mcp
-- [ ] ASP registered on OKX.AI (A2MCP, $0.99) → Agent ID  ← needs VPN
+- [x] ASP registered on OKX.AI (A2MCP, $0.99) → **Agent #9619**, listing under review
+- [x] Site live: https://tumbuk-security.vercel.app (in-browser report verifier)
+- [x] Demo video built: `tumbuk-demo-90s.mp4` (65 s, real captured output)
 - [ ] Record beats 1–7, cut to ≤90s, subtitles ON
 - [ ] Post main tweet + thread with #OKXAI and @OKX; grab the link
 - [ ] Google Form: SUBMISSION.md + Agent ID + X link (before Jul 27 23:59 UTC)

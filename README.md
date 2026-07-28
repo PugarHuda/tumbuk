@@ -12,10 +12,14 @@ reproducible vulnerability report — settled in USDT0 on X Layer.
 *Tumbuk* (Indonesian: to pound/crush) — an agent that pounds on other agents before
 you trust them with money or data.
 
+**Live:** [tumbuk-security.vercel.app](https://tumbuk-security.vercel.app) (site + in-browser
+report verifier) · MCP endpoint `https://tumbuk.vercel.app/mcp` · OKX.AI **Agent #9619**
+("Tumbuk Red-Team", X Layer, listing under review).
+
 ## Why it fits OKX.AI Genesis
 
-- **Real A2MCP integration** — a pay-per-call ASP, priced and settled as **x402 on X
-  Layer** (the exact facilitator/asset config validated live against OKX's own SDK).
+- **Real A2MCP integration** — a pay-per-call ASP settled as **x402 v2 on X Layer**
+  through OKX's **official seller SDK** (`okxweb3-app-x402`) and facilitator.
 - **A2MCP-composable** — any builder listing an ASP can hire Tumbuk as a pre-listing
   security gate before they go live on the marketplace. A dependency other agents want.
 - **Not slop** — nobody else in the field red-teams the *behavior* layer; grading is
@@ -82,12 +86,29 @@ the agent's reply as text or JSON (`output`/`response`/`text`/`reply`/`message`/
 
 ## x402 / X Layer
 
-`x402.py` mirrors the sibling **DALANG** project's payment layer, confirmed live
-against OKX's own `@okxweb3/x402-*` SDK: facilitator `https://web3.okx.com/facilitator`
-(standard `/verify` + `/settle`), network `eip155:196` (X Layer), asset **USDT0**
-(`0x779ded0c9e1022225f8e0630b35a9b54be713736`, EIP-3009). Set `TUMBUK_X402_PAYTO` to
+`okxpay.py` is the payment gate (named that way deliberately: OKX's official SDK
+installs a package literally called `x402`, and a local `x402.py` shadows it). Network
+`eip155:196` (X Layer), asset **USDT0** (`0x779ded0c9e1022225f8e0630b35a9b54be713736`,
+EIP-3009), facilitator `https://web3.okx.com/facilitator`. Set `TUMBUK_X402_PAYTO` to
 your X Layer wallet to enable the gate — the paid `redteam_scan` tool then returns
-HTTP 402 until paid. Three FREE tools stay open: `quote()` (price), `probe_catalog()`
+HTTP 402 until paid.
+
+**Wire protocol, as OKX actually speaks it** (each of these cost a listing rejection to
+learn):
+
+| | |
+|---|---|
+| Challenge out | `PAYMENT-REQUIRED` **response header**, base64 of `{x402Version, resource, accepts:[…]}` — a body-only 402 is not enough |
+| Version | **x402 v2** — `amount`, `payTo`, and `resource` as an *object*; the v1 keys (`maxAmountRequired`, string `resource`) ride along inside `accepts` for older clients |
+| Payment in | `PAYMENT-SIGNATURE` (v2) or `X-PAYMENT` (v1); `PAYMENT-SIG` also accepted |
+| Proof out | `PAYMENT-RESPONSE` **and** `X-PAYMENT-RESPONSE` |
+| Verify/settle | OKX's **official seller SDK** (`pip install okxweb3-app-x402`) when `OKX_API_KEY` / `OKX_SECRET_KEY` / `OKX_PASSPHRASE` are set — the facilitator answers **403 to unsigned calls**, so the credentials are not optional. Get them at the [OKX Developer Portal](https://web3.okx.com/onchainos/dev-portal). |
+
+The payment is always verified against **our** quoted requirement, never the `accepted`
+block a caller claims — otherwise anyone could assert they had agreed to pay 1 atomic
+unit. Credentials are scrubbed out of any error text that travels back to a caller.
+
+Three FREE tools stay open: `quote()` (price), `probe_catalog()`
 (the exact suite that will be fired at your endpoint, so you can audit it before
 paying), and `verify_report(report_json)` (recompute a report's digest and prove it
 wasn't altered — the buyer's half of the tamper-evident claim; a report embeds the
@@ -124,11 +145,18 @@ redteam.py    parallel probe runner + safety-first scoring/grading
 report.py     markdown report + embedded JSON block + tamper-evident digest
 server.py     FastMCP tools (paid redteam_scan; free quote, probe_catalog,
               verify_report) + x402 gate
-x402.py       x402/X Layer paid-endpoint middleware (OKX-confirmed config)
-api/index.py  Vercel serverless entrypoint
+okxpay.py     x402 v2 paid-endpoint middleware + OKX seller-SDK verify/settle
+api/index.py  Vercel serverless entrypoint (json_response — see below)
+web/          landing page + in-browser report verifier (own Vercel project)
 demo.py       offline full-deliverable demo (no network, no key)
 test_tumbuk.py / test_server.py   self-checks (pure logic + integration)
 ```
+
+**Serverless gotcha worth keeping:** `api/index.py` builds the MCP app with
+`json_response=True`. With the default SSE transport, Vercel's ASGI bridge cancels the
+stream before it flushes and **every call returns HTTP 200 with an empty body** — tools
+list included. Status-code-only smoke tests never see it; `vercel logs` shows
+`ASGI callable returned without completing response`.
 
 ## License
 

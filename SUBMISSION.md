@@ -209,8 +209,12 @@ only outbound probe bandwidth, so the $0.99 is near-pure margin (unlike a render
 ## Status checklist
 - [x] Code complete, self-checks + demo green, security audit clean, pushed (`PugarHuda/tumbuk`)
 - [x] Deployed live to Vercel — https://tumbuk.vercel.app/mcp (paid x402 gate verified: 402 w/o payment, $0.99 USDT0 / X Layer)
-- [x] Registered as A2MCP ASP on OKX — **Agent ID 9619**, submitted for review (2026-07-27)
+- [x] Registered as A2MCP ASP on OKX — **Agent ID 9619**, listing under review
   - two services: paid `Agent Red-Team Security Scan` (0.99) + free `Report Digest Verification` (0)
+  - rejected twice (challenge not in the PAYMENT-REQUIRED header; real calls not matching the
+    described capability), fixed and resubmitted 2026-07-28 on x402 v2 + OKX's official seller SDK
+- [x] Site live with an in-browser report verifier: https://tumbuk-security.vercel.app
+- [x] Demo video built (65 s, every panel real captured output): `tumbuk-demo-90s.mp4`
 - [ ] Record + post the ≤90s demo on X with #OKXAI @OKX → paste link  ← YOUR NEXT STEP (script in demo-x-post.md)
 - [ ] Submit this form before Jul 27 23:59 UTC (= Jul 28 06:59 WIB) — Telegram handle is the only field nobody but you can fill
 
